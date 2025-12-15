@@ -1,0 +1,83 @@
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as vscode from 'vscode';
+import { AnnotationService } from './services/AnnotationService';
+import { LocalFileRepository } from './repositories/LocalFileRepository';
+import { Annotation } from './records/Annotation';
+
+
+let decorationType = vscode.window.createTextEditorDecorationType({
+  backgroundColor: 'rgba(255, 255, 0, 0.3)'
+});
+
+let annotationService: AnnotationService;
+
+// This method is called when the extension is initialized
+export async function activate(context: vscode.ExtensionContext) {
+
+	// Initialize the annotation service - this handles CRUD for annotations
+  annotationService = new AnnotationService(new LocalFileRepository());
+  await annotationService.refreshAnnotations();
+  
+	// Set up the Add command
+  //let addAnnotationCommand = new AddAnnotationCommand();
+  vscode.commands.registerCommand('BoxesNLines.AddAnnotation', async ()=>{
+		const editor = vscode.window.activeTextEditor!;
+		const selection = editor.selection;
+		const text = await vscode.window.showInputBox({ prompt: 'Enter annotation text' });
+		await annotationService.addAnnotation(new Annotation(selection, text!, 'TODO'));
+		await updateDecorations();
+	});
+
+	await updateDecorations();
+}
+
+// Refresh "decorations" to show highlights on annotated lines and enable 'hover-to-show' functionality
+async function updateDecorations() {
+	const editor = vscode.window.activeTextEditor;
+	if (!editor) {
+	  return;
+	}
+  
+	const allAnnotations = await annotationService.getAnnotations();
+	const decorations: vscode.DecorationOptions[] = [];
+  
+	allAnnotations.forEach((annotations, selectionKey) => {
+	  const [start, end] = selectionKey.split('-');
+	  const [startLine, startChar] = start.split(':').map(Number);
+	  const [endLine, endChar] = end.split(':').map(Number);
+	  const range = new vscode.Range(startLine, startChar, endLine, endChar);
+  
+	  annotations.forEach(annotation =>
+		decorations.push({
+		  range,
+		  hoverMessage: new vscode.MarkdownString(`💬 **Annotation:**\n${annotation.text}`)
+		})
+	  );
+	});
+  
+	editor.setDecorations(decorationType, decorations);
+  }
+
+// class AnnotationProvider implements vscode.TreeDataProvider<IAnnotation> {
+//   private _onDidChangeTreeData = new vscode.EventEmitter<IAnnotation | undefined>();
+//   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+//   getTreeItem(element: IAnnotation): vscode.TreeItem {
+//     const item = new vscode.TreeItem(element.text, vscode.TreeItemCollapsibleState.None);
+//     item.command = {
+//       command: 'codeAnnotator.revealAnnotation',
+//       title: 'Reveal Annotation',
+//       arguments: [element]
+//     };
+//     return item;
+//   }
+
+//   getChildren(): IAnnotation[] {
+//     return annotations;
+//   }
+
+//   refresh(): void {
+//     this._onDidChangeTreeData.fire(undefined);
+//   }
+// }
