@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { createHash } from 'crypto';
 import { IAnnotationRepository } from "./IAnnotationRepository";
 import { Annotation } from '../records/Annotation';
 
@@ -50,7 +51,7 @@ export class LocalFileRepository implements IAnnotationRepository {
   }
 
   private getFileUri(fileKey: string): vscode.Uri {
-    const encodedFileName = encodeURIComponent(fileKey) + '.json';
-    return vscode.Uri.joinPath(this.localFilePath!, encodedFileName);
+    const hashedFileName = createHash('sha256').update(fileKey).digest('hex').slice(0, 16) + '.json';
+    return vscode.Uri.joinPath(this.localFilePath!, hashedFileName);
   }
 }
