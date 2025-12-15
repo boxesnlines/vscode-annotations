@@ -15,12 +15,28 @@ let annotationService: AnnotationService;
 // This method is called when the extension is initialized
 export async function activate(context: vscode.ExtensionContext) {
 
-	// Initialize the annotation service - this handles CRUD for annotations
+  // Initialize the annotation service - this handles CRUD for annotations
   annotationService = new AnnotationService(new LocalFileRepository());
-  await annotationService.refreshAnnotations();
   
+  const editor = vscode.window.activeTextEditor;
+  const handleEditorChange = async (editor?: vscode.TextEditor) => {
+    if (!editor) {
+      decorationType.dispose();
+      decorationType = vscode.window.createTextEditorDecorationType({
+        backgroundColor: 'rgba(255, 255, 0, 0.3)'
+      });
+      return;
+    }
+
+    await annotationService.refreshAnnotations();
+    await updateDecorations();
+  };
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(handleEditorChange)
+  );
+
 	// Set up the Add command
-  //let addAnnotationCommand = new AddAnnotationCommand();
   vscode.commands.registerCommand('BoxesNLines.AddAnnotation', async ()=>{
 		const editor = vscode.window.activeTextEditor!;
 		const selection = editor.selection;
@@ -29,7 +45,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		await updateDecorations();
 	});
 
-	await updateDecorations();
+	if (editor) {
+		await updateDecorations();
+	}
 }
 
 // Refresh "decorations" to show highlights on annotated lines and enable 'hover-to-show' functionality
