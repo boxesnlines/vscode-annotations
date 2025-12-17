@@ -19,17 +19,21 @@
         "command": "BoxesNLines.AddAnnotation",
         "title": "Boxes'n'Lines: Add Annotation"
       },
-      {
-        "command": "BoxesNLines.EditAnnotation",
-        "title": "Boxes'n'Lines: Edit Annotation"
+            {
+        "command": "BoxesNLines.DeleteAnnotation",
+        "title": "Delete"
       },
       {
-        "command": "BoxesNLines.DeleteAnnotation",
-        "title": "Boxes'n'Lines: Delete Annotation"
+        "command": "BoxesNLines.EditAnnotation",
+        "title": "Edit"
       },
       {
         "command": "BoxesNLines.ShowAnnotations",
         "title": "Boxes'n'Lines: Show All Annotations"
+      },
+      {
+        "command": "BoxesNLines.RevealAnnotation",
+        "title": "Reveal"
       }
     ],
     "viewsContainers": {
@@ -61,6 +65,11 @@
       "view/item/context": [
         {
           "command": "BoxesNLines.DeleteAnnotation",
+          "when": "view == annotationsList && viewItem == annotation",
+          "group": "inline"
+        },
+        {
+          "command": "BoxesNLines.EditAnnotation",
           "when": "view == annotationsList && viewItem == annotation",
           "group": "inline"
         }
