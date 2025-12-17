@@ -37,7 +37,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // Set up the Add command
-  vscode.commands.registerCommand('BoxesNLines.AddAnnotation', async ()=>{
+  context.subscriptions.push(vscode.commands.registerCommand('BoxesNLines.AddAnnotation', async ()=>{
 		const editor = vscode.window.activeTextEditor!;
 		let selection = editor.selection;
 
@@ -47,13 +47,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 
 		const text = await vscode.window.showInputBox({ prompt: 'Enter annotation text' });
-		await annotationService.addAnnotation(new Annotation(selection, text!, 'TODO'));
+		await annotationService.addAnnotation(new Annotation(selection, text!));
 		await updateDecorations();
-	});
+	}));
 
-	if (editor) {
-		await updateDecorations();
-	}
+	await handleEditorChange(editor);
 }
 
 // Refresh "decorations" to show highlights on annotated lines and enable 'hover-to-show' functionality
@@ -82,26 +80,3 @@ async function updateDecorations() {
   
 	editor.setDecorations(decorationType, decorations);
   }
-
-// class AnnotationProvider implements vscode.TreeDataProvider<IAnnotation> {
-//   private _onDidChangeTreeData = new vscode.EventEmitter<IAnnotation | undefined>();
-//   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
-
-//   getTreeItem(element: IAnnotation): vscode.TreeItem {
-//     const item = new vscode.TreeItem(element.text, vscode.TreeItemCollapsibleState.None);
-//     item.command = {
-//       command: 'codeAnnotator.revealAnnotation',
-//       title: 'Reveal Annotation',
-//       arguments: [element]
-//     };
-//     return item;
-//   }
-
-//   getChildren(): IAnnotation[] {
-//     return annotations;
-//   }
-
-//   refresh(): void {
-//     this._onDidChangeTreeData.fire(undefined);
-//   }
-// }
