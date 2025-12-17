@@ -54,7 +54,7 @@
       "editor/context": [
         {
           "command": "BoxesNLines.AddAnnotation",
-          "when": "editorHasSelection",
+          "when": "editorHasSelection || editorTextFocus",
           "group": "navigation"
         }
       ],

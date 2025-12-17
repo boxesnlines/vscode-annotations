@@ -36,10 +36,16 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.onDidChangeActiveTextEditor(handleEditorChange)
   );
 
-	// Set up the Add command
+  // Set up the Add command
   vscode.commands.registerCommand('BoxesNLines.AddAnnotation', async ()=>{
 		const editor = vscode.window.activeTextEditor!;
-		const selection = editor.selection;
+		let selection = editor.selection;
+
+		// If the selection contains zero chars, swap it for the whole line
+		if (selection.end.character - selection.start.character === 0) {
+			selection = new vscode.Selection(selection.start.line, 0, selection.end.line, editor.document.lineAt(selection.end.line).text.length);
+		}
+
 		const text = await vscode.window.showInputBox({ prompt: 'Enter annotation text' });
 		await annotationService.addAnnotation(new Annotation(selection, text!, 'TODO'));
 		await updateDecorations();
@@ -69,7 +75,7 @@ async function updateDecorations() {
 	  annotations.forEach(annotation =>
 		decorations.push({
 		  range,
-		  hoverMessage: new vscode.MarkdownString(`💬 **Annotation:**\n${annotation.text}`)
+		  hoverMessage: new vscode.MarkdownString(`💬\n${annotation.text}`)
 		})
 	  );
 	});
