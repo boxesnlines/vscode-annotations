@@ -41,7 +41,7 @@
         {
           "id": "annotations-view",
           "title": "Annotations",
-          "icon": "media/annotations.svg"
+          "icon": "src/media/annotations.svg"
         }
       ]
     },
@@ -50,7 +50,7 @@
         {
           "id": "annotationsList",
           "name": "All Annotations",
-          "icon": "media/plus-light.svg"
+          "icon": "src/media/annotations.svg"
         }
       ]
     },
